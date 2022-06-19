@@ -4,7 +4,7 @@
 
 <div class="container w-auto">
     <div class="bg-white border border-dark px-3">
-        <h3 class="text-center border-bottom pt-2 pb-2">Agregar una tarea</h3>
+        <h3 class="text-center border-bottom pt-2 pb-2">Editar una tarea</h3>
 
         {{-- Muestra mensaje de exito al crear la liga --}}
         @include('components.show-messages-success-errors')
@@ -25,7 +25,7 @@
                         autofocus
                     @enderror
                     >Nombre:</label>
-                  <input type="text" name="task" class="form-control" id="task" aria-describedby="taskHelp">
+                  <input type="text" name="task" class="form-control" id="task" aria-describedby="taskHelp" value="{{$task->name}}">
                   <div id="taskHelp" class="form-text">Nombre de la tarea.</div>
                   @error('task')
                       <span class="invalid-feedback" role="alert">
@@ -33,7 +33,7 @@
                       </span>
                   @enderror
                 </div>
-                <button type="submit" class="btn btn-primary">Agregar</button>
+                <button type="submit" class="btn btn-primary">Editar</button>
               </form>
         </div>
     </div>

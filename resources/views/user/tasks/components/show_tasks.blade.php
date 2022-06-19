@@ -14,6 +14,11 @@
                     <tr>
                         <th>{{$task->name}}</th>
                         <th>
+                            <a
+                            href="{{route('user.tasks.edit', ['task' => $task->id])}}"
+                            >Editar</a>
+                        </th>
+                        <th>
                             <form method="POST" action="{{route('user.tasks.destroy', ['task' => $task->id])}}">
                                 @csrf
                                 @method("delete")

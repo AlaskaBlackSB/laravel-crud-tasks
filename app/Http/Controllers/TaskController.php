@@ -6,12 +6,12 @@ use App\Http\Requests\CreateTaskRequest;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
 
 class TaskController extends Controller
 {
 
-    public function index(){
+    public function index()
+    {
 
         //Busca el usuario
         $user = User::find(Auth::id());
@@ -23,7 +23,8 @@ class TaskController extends Controller
         ]);
     }
 
-    public function store(CreateTaskRequest $request){
+    public function store(CreateTaskRequest $request)
+    {
 
         $task = Task::create([
             'name' => $request->task
@@ -41,26 +42,61 @@ class TaskController extends Controller
 
     }
 
-    public function destroy($id){
+    public function edit($id)
+    {
 
-        //Busca la tarea
-        $task = Task::find($id);
+        /* Comprobamos que la tarea exista y que sea del usuario autenticado */
+        $models = verifyTask($id);
 
-        //Comprueba que la tarea existe
-        if (!$task) {
-            //Redirecciona al index de tareas con un mensaje de error
+        if ($models === false) {
             return redirect()->route('user.tasks.index')
-            ->with('error', 'La tarea no existe.');
+            ->with('error', 'La tarea no existe o no pertenece al usuario autenticado.');
         }
 
-        //Busca el usuario
-        $user = User::find(Auth::id());
+        return View('user.tasks.show_task', [
+            'task' => $models['task'],
+            'tasks' => $models['user']->tasks,
+            'action' => route('user.tasks.update', ['task' => $models['task']->id]),
+            'method' => 'PUT',
+        ]);
+    }
+
+    public function update(CreateTaskRequest $request, $id)
+    {
+
+        /* Comprobamos que la tarea exista y que sea del usuario autenticado */
+        $models = verifyTask($id);
+
+        if ($models === false) {
+            return redirect()->route('user.tasks.index')
+            ->with('error', 'La tarea no existe o no pertenece al usuario autenticado.');
+        }
+
+        // Actualiza la tarea
+        $models['task']->update([ 'name' => $request->task]);
+
+        //Redirecciona al index de tareas
+        return redirect()->route('user.tasks.index')
+        ->with('success', 'Tarea actualizada correctamente.');
+
+    }
+
+    public function destroy($id)
+    {
+
+        /* Comprobamos que la tarea exista y que sea del usuario autenticado */
+        $models = verifyTask($id);
+
+        if ($models === false) {
+            return redirect()->route('user.tasks.index')
+            ->with('error', 'La tarea no existe o no pertenece al usuario autenticado.');
+        }
 
         //Elimina de la tabla pivote la tarea ligada al usuario
-        $user->tasks()->detach($task->id);
+        $models['user']->tasks()->detach($models['task']->id);
 
         //Elimina la tarea
-        $task->delete();
+        $models['task']->delete();
 
         //Redirecciona al index de tareas
         return redirect()->route('user.tasks.index')
